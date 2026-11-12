@@ -22,6 +22,8 @@ Stack:
 - [API contract](api/openapi.yaml) (OpenAPI 3.1).
 - [Runbooks](docs/runbooks/README.md): the official record of how the product behaves, one runbook per user flow.
 
+The batch-booking endpoint is described in [Create a batch of bookings](docs/booking-batches.md).
+
 ## Setup
 
 Prerequisites:
