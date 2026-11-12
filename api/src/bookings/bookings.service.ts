@@ -34,7 +34,7 @@ function isResourceId(value: unknown): value is string {
 }
 
 // Returns the booking to insert, or null when the body is invalid_data.
-function parseBooking(body: unknown): Booking | null {
+export function parseBooking(body: unknown): Booking | null {
   if (typeof body !== 'object' || body === null || Array.isArray(body)) {
     return null;
   }

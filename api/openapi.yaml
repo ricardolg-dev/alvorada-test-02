@@ -11,6 +11,65 @@ servers:
 # Authentication is out of scope (PRD).
 security: []
 paths:
+  /booking-batches:
+    post:
+      operationId: createBookingBatch
+      summary: Create one to ten bookings atomically
+      description: >
+        Follows docs/booking-batches.md. Validate all items and distinct request
+        IDs first. Check resources, occupied IDs and conflicts in request order.
+        Include same-batch overlaps. A rejection or storage failure writes nothing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookings]
+              properties:
+                bookings:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: All created booking views in request order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [bookings]
+                properties:
+                  bookings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+        '422':
+          description: Invalid envelope or item, including repeated request IDs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchFailure'
+        '404':
+          description: Unknown resource at the reported index.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchFailure'
+        '409':
+          description: Taken ID or overlap with a stored or earlier batch booking.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchFailure'
+        '503':
+          description: Storage failure; the complete batch is rolled back.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchFailure'
   /health:
     get:
       operationId: getHealth
@@ -307,6 +366,21 @@ paths:
                 message: Send resource, integer start and end from 0 to 100 with start before end, and optionally an id (1 to 64 letters, digits, - or _).
 components:
   schemas:
+    BatchFailure:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum: [invalid_data, unknown_resource, id_taken, conflict, unavailable]
+        index:
+          type: integer
+          minimum: 0
+          maximum: 9
+        conflicts:
+          type: array
+          items:
+            type: string
     Resource:
       type: object
       required: [id, name]

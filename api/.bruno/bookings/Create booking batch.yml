@@ -1,0 +1,24 @@
+info:
+  name: Create booking batch
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/booking-batches"
+  body:
+    type: json
+    data: |-
+      {
+        "bookings": [
+          { "id": "A", "resource": "R1", "start": 10, "end": 20 },
+          { "id": "B", "resource": "R1", "start": 20, "end": 30 }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
